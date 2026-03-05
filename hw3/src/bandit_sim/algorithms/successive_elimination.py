@@ -1,4 +1,4 @@
-"""Explore-Then-Commit algorithm."""
+"""Successive Elimination algorithm."""
 
 from __future__ import annotations
 
