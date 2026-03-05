@@ -99,11 +99,18 @@ This generates:
 
 The current experiment compares:
 
-- `EpsilonGreedy`
+- `EpsilonGreedy (c=10)`
+- `EpsilonGreedy (c=50)`
 - `ExploreThenCommit`
 - `SuccessiveElimination`
 
 on a two-armed Gaussian bandit where one arm is optimal and the other is separated by a gap `delta`.
+
+The plot also overlays theoretical bounds for:
+
+- `EpsilonGreedy (c=50)`
+- `ExploreThenCommit`
+- `SuccessiveElimination`
 
 ### Plot
 

@@ -100,6 +100,13 @@ def plot_c_sweep(
     """Plot empirical regret vs delta for each epsilon-greedy c value."""
     config.output_path.parent.mkdir(parents=True, exist_ok=True)
     figure, axis = plt.subplots(figsize=(8, 5))
+    color_map = {
+        "c=0.1": "tab:orange",
+        "c=1": "tab:green",
+        "c=10": "tab:purple",
+        "c=50": "tab:blue",
+        "c=1000": "tab:red",
+    }
 
     for label, metrics in results.items():
         axis.errorbar(
@@ -109,6 +116,7 @@ def plot_c_sweep(
             marker="o",
             capsize=4,
             linewidth=2,
+            color=color_map[label],
             label=label,
         )
 

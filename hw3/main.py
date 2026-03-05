@@ -59,7 +59,8 @@ def empirical_regret_statistics(
 def build_algorithms() -> dict[str, BanditAlgorithm]:
     """Create fresh algorithm instances for one bandit instance."""
     return {
-        "epsilon_greedy": EpsilonGreedy(c=50.0, seed=GLOBAL_SEED),
+        "epsilon_greedy_c10": EpsilonGreedy(c=10.0, seed=GLOBAL_SEED),
+        "epsilon_greedy_c50": EpsilonGreedy(c=50.0, seed=GLOBAL_SEED),
         "explore_then_commit": ExploreThenCommit(m=None, seed=GLOBAL_SEED),
         "successive_elimination": SuccessiveElimination(seed=GLOBAL_SEED),
     }
@@ -159,12 +160,19 @@ def plot_regret_vs_delta(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     figure, axis = plt.subplots(figsize=(8, 5))
     colors = {
-        "epsilon_greedy": "tab:blue",
+        "epsilon_greedy_c10": "tab:purple",
+        "epsilon_greedy_c50": "tab:blue",
         "explore_then_commit": "tab:orange",
         "successive_elimination": "tab:green",
     }
 
     for name, metrics in results.items():
+        label_map = {
+            "epsilon_greedy_c10": r"$\epsilon$-greedy ($c=10$)",
+            "epsilon_greedy_c50": r"$\epsilon$-greedy ($c=50$)",
+            "explore_then_commit": "ETC",
+            "successive_elimination": "SE",
+        }
         axis.errorbar(
             deltas,
             metrics["average_regret"],
@@ -173,7 +181,7 @@ def plot_regret_vs_delta(
             capsize=4,
             linewidth=2,
             color=colors[name],
-            label=name,
+            label=label_map[name],
         )
 
     # Plot theoretical upper bounds on regret
@@ -186,18 +194,17 @@ def plot_regret_vs_delta(
     n_arms = 2
     se_bound = np.full_like(deltas, np.sqrt(n_arms * config.horizon * np.log(config.horizon)))
 
-    # Epsilon-Greedy bound
-    epsilon_greedy_c = 50.0
-    eg_bound = epsilon_greedy_c * deltas + deltas * config.horizon / epsilon_greedy_c
+    # Epsilon-Greedy c=50 bound
+    epsilon_greedy_c50_bound = 50.0 * deltas + deltas * config.horizon / 50.0
 
     axis.plot(
         deltas,
-        eg_bound,
+        epsilon_greedy_c50_bound,
         "--",
-        color=colors["epsilon_greedy"],
+        color=colors["epsilon_greedy_c50"],
         linewidth=2,
         alpha=0.8,
-        label="epsilon_greedy_bound",
+        label=r"$\epsilon$-greedy ($c=50$) bound",
     )
     axis.plot(
         deltas,
@@ -206,7 +213,7 @@ def plot_regret_vs_delta(
         color=colors["explore_then_commit"],
         linewidth=2,
         alpha=0.8,
-        label="explore_then_commit_bound",
+        label="ETC bound",
     )
     axis.plot(
         deltas,
@@ -215,14 +222,22 @@ def plot_regret_vs_delta(
         color=colors["successive_elimination"],
         linewidth=2,
         alpha=0.8,
-        label="successive_elimination_bound",
+        label="SE bound",
     )
 
     axis.set_xlabel(r"Gap $\Delta$")
     axis.set_ylabel(rf"Expected Regret at Horizon $n = {config.horizon}$")
     axis.set_title("Monte Carlo Simulations on a 2-Armed Bandit Problem")
     axis.grid(True, alpha=0.3)
-    axis.legend(loc="lower right", fontsize=7)
+    axis.legend(
+        loc="lower right",
+        fontsize=6,
+        handlelength=3.0,
+        handletextpad=0.5,
+        labelspacing=0.3,
+        borderpad=0.3,
+        framealpha=0.9,
+    )
 
     figure.tight_layout()
     figure.savefig(output_path, dpi=200)
