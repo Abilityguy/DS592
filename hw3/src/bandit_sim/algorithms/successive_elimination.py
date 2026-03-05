@@ -39,7 +39,7 @@ class SuccessiveElimination(BanditAlgorithm):
         # We play each active arm once
         active_arms = np.where(self.active_arms)[0]
         active_arm_counts = self.counts[active_arms]
-        max_count = np.max(active_arm_counts)  # Should be one greater than the minimum count among active arms
+        max_count = np.max(active_arm_counts)  # Should be atmost one greater than the minimum count among active arms
         arms_to_play = active_arms[active_arm_counts < max_count]
         if len(arms_to_play) > 0:
             return int(self._rng.choice(arms_to_play))
