@@ -20,8 +20,7 @@ Top-level experiment files:
 
 ```text
 main.py
-results/regret_vs_delta.json
-results/regret_vs_delta.png
+epsilon_greedy_c_experiment.py
 ```
 
 ## Setup
@@ -51,6 +50,7 @@ pip install -e ".[dev]"
 - `algorithms/` contains strategy classes that choose which arm to pull and run simulations.
 - Randomness uses NumPy's random generator API.
 - `main.py` runs a two-armed Gaussian bandit delta sweep and saves both a plot and a JSON summary.
+- `epsilon_greedy_c_experiment.py` runs the same delta sweep but only for epsilon-greedy across multiple `c` values.
 
 ## Quick Example
 
@@ -105,6 +105,32 @@ The current experiment compares:
 
 on a two-armed Gaussian bandit where one arm is optimal and the other is separated by a gap `delta`.
 
+### Plot
+
+![Regret vs Delta](assets/regret_vs_delta.png)
+
+## Epsilon-Greedy c Sweep
+
+Run the epsilon-greedy-only experiment with:
+
+```bash
+python epsilon_greedy_c_experiment.py
+```
+
+This evaluates epsilon-greedy for:
+
+- `c = 0.1`
+- `c = 1`
+- `c = 10`
+- `c = 50`
+- `c = 1000`
+
+and saves the plot to `results/epsilon_greedy_c_sweep.png`.
+
+### Plot
+
+![Epsilon-Greedy c Sweep](assets/epsilon_greedy_c_sweep.png)
+
 ## Outputs
 
 The JSON summary stores, for each delta:
@@ -120,9 +146,3 @@ Format the code with:
 ```bash
 ruff format .
 ```
-
-## Next Steps
-
-- Add more algorithms such as UCB, Thompson Sampling, and EXP3.
-- Add more bandit environments such as contextual or non-stationary bandits.
-- Add tests for algorithm correctness and simulation behavior.

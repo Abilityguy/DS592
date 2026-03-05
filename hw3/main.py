@@ -99,10 +99,7 @@ def run_delta_sweep(config: DeltaSweepConfig) -> dict[str, dict[str, np.ndarray]
             results[name]["average_regret"][delta_index] = average_regret
             results[name]["standard_error"][delta_index] = standard_error
 
-            print(
-                f"  {name}: average_regret={average_regret:.4f}, "
-                f"standard_error={standard_error:.4f}"
-            )
+            print(f"  {name}: average_regret={average_regret:.4f}, standard_error={standard_error:.4f}")
 
         print()
 

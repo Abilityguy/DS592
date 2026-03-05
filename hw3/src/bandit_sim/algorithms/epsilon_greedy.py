@@ -31,13 +31,13 @@ class EpsilonGreedy(BanditAlgorithm):
         self._check_initialized()
         assert self.n_arms is not None
 
+        # Explore: select a random arm
         epsilon = min(1.0, self.c / max(1, self.total_steps))
         if self._rng.random() < epsilon:
-            return int(self._rng.integers(self.n_arms))  # Explore: select a random arm
+            return int(self._rng.integers(self.n_arms))
 
-        return int(
-            np.argmax(self.value_estimates)
-        )  # Exploit: select the arm with the highest estimated value
+        # Exploit: select the arm with the highest estimated value
+        return int(np.argmax(self.value_estimates))
 
     def update(self, arm_index: int, reward: float) -> None:
         self._check_initialized()

@@ -44,9 +44,11 @@ class ExploreThenCommit(BanditAlgorithm):
         self._check_initialized()
         assert self.n_arms is not None
 
+        # Exploration Phase
         if self.total_steps < self._active_exploration_rounds:
             return int(self.total_steps % self.n_arms)  # Round-robin exploration of arms
 
+        # Exploitation Phase
         if self.commit_arm is None:
             self.commit_arm = int(np.argmax(self.value_estimates))
         return self.commit_arm

@@ -39,9 +39,7 @@ class SuccessiveElimination(BanditAlgorithm):
         # We play each active arm once
         active_arms = np.where(self.active_arms)[0]
         active_arm_counts = self.counts[active_arms]
-        max_count = np.max(
-            active_arm_counts
-        )  # Should be one greater than the minimum count among active arms
+        max_count = np.max(active_arm_counts)  # Should be one greater than the minimum count among active arms
         arms_to_play = active_arms[active_arm_counts < max_count]
         if len(arms_to_play) > 0:
             return int(self._rng.choice(arms_to_play))
@@ -61,18 +59,16 @@ class SuccessiveElimination(BanditAlgorithm):
         estimate = self.value_estimates[arm_index]
         self.value_estimates[arm_index] = estimate + (reward - estimate) / count
 
-        # If all arms have been played at least once, we can start eliminating suboptimal arms
+        # If all arms have been played once in the current round, we can start eliminating suboptimal arms
         active_arms = np.where(self.active_arms)[0]
         active_arm_counts = self.counts[active_arms]
-        max_count = np.max(
-            active_arm_counts
-        )  # Should be one greater than the minimum count among active arms
-        if len(active_arms[active_arm_counts < max_count]) == 0: # All arms have been played the same number of times, so we can start elimination
+        max_count = np.max(active_arm_counts)  # Should be one greater than the minimum count among active arms
+        if (
+            len(active_arms[active_arm_counts < max_count]) == 0
+        ):  # All arms have been played the same number of times, so we can start elimination
             # Deactivate arms whose UCB is less than max LCB of active arms
             active_arms = np.where(self.active_arms)[0]
-            confidence_radius = np.sqrt(
-                2 * np.log(self._run_horizon) / self.counts[active_arms]
-            )
+            confidence_radius = np.sqrt(2 * np.log(self._run_horizon) / self.counts[active_arms])
             ucb = self.value_estimates[active_arms] + confidence_radius
             lcb = self.value_estimates[active_arms] - confidence_radius
             max_lcb = np.max(lcb)
