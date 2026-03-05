@@ -62,7 +62,7 @@ class SuccessiveElimination(BanditAlgorithm):
         # If all arms have been played once in the current round, we can start eliminating suboptimal arms
         active_arms = np.where(self.active_arms)[0]
         active_arm_counts = self.counts[active_arms]
-        max_count = np.max(active_arm_counts)  # Should be one greater than the minimum count among active arms
+        max_count = np.max(active_arm_counts)
         if (
             len(active_arms[active_arm_counts < max_count]) == 0
         ):  # All arms have been played the same number of times, so we can start elimination
