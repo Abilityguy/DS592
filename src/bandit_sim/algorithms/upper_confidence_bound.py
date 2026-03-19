@@ -36,6 +36,11 @@ class UpperConfidenceBound(BanditAlgorithm):
         self._check_initialized()
         assert self.n_arms is not None
 
+        # Pull each arm once before applying UCB
+        for arm_index in range(self.n_arms):
+            if self.counts[arm_index] == 0:
+                return int(arm_index)
+
         confidence_radius = self.beta * np.sqrt(
             2 * np.log(2 * self._run_horizon * self.n_arms / self.delta) / self.counts
         )

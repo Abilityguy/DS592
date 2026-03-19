@@ -32,19 +32,19 @@ class ThompsonSampling(BanditAlgorithm):
     def _initialize_state(self) -> None:
         assert self.n_arms is not None
         self.counts = np.zeros(self.n_arms, dtype=np.int_)
+        self.arm_reward_history: list[list[float]] = [[] for _ in range(self.n_arms)]
 
         if self.prior_type == "gaussian":
-            self._means = np.array([x["mean"] for x in self.prior_args], dtype=np.float64)
-            self._stds = np.array([x["std"] for x in self.prior_args], dtype=np.float64)
+            self._posterior_args = [{"loc": x["mean"], "scale": x["std"]} for x in self.prior_args]
         elif self.prior_type == "uniform":
             self._mins = np.array([x["min"] for x in self.prior_args], dtype=np.float64)
             self._maxs = np.array([x["max"] for x in self.prior_args], dtype=np.float64)
+            self._posterior_args: list[Any] = [None for _ in range(self.n_arms)]
         else:
             raise ValueError("Invalid prior_type. Must be 'gaussian' or 'uniform'.")
 
     def _prepare_run(self, horizon: int) -> None:
-        self._posterior_args: list[Any] = [None for _ in range(self.n_arms)]
-        self.arm_reward_history: list[list[float]] = [[] for _ in range(self.n_arms)]
+        """No per-run setup is required beyond state initialization."""
 
     def select_arm(self) -> int:
         self._check_initialized()
@@ -52,7 +52,7 @@ class ThompsonSampling(BanditAlgorithm):
 
         # Sample mean from the posterior distribution for each arm
         if self.prior_type == "gaussian":
-            sampled_means = [self._rng.normal(loc=loc, scale=scale) for loc, scale in zip(self._means, self._stds)]
+            sampled_means = [self._rng.normal(loc=x["loc"], scale=x["scale"]) for x in self._posterior_args]
         else:  # self.prior_type == "uniform"
             # For arms with no pulls, we assume uniform prior, but the rewards are actually Gaussian distributed, so we switch to Gaussian posterior after the first turn
             sampled_means = []
