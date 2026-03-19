@@ -3,20 +3,21 @@ from typing import Dict, Tuple
 
 # We can write an adjacency list representation of the network using a dictionary.
 nn = {
-    '11': ('21', '22'),
-    '12': ('22', '23'),
-    '21': ('31', '32'),
-    '22': ('31', '32'),
-    '23': ('31', '32'),
-    '31': ('41', '42', '43'),
-    '32': ('41', '42', '43'),
-    '41': (), # Empty tuple indicates final node
-    '42': (),
-    '43': (),
+    "11": ("21", "22"),
+    "12": ("22", "23"),
+    "21": ("31", "32"),
+    "22": ("31", "32"),
+    "23": ("31", "32"),
+    "31": ("41", "42", "43"),
+    "32": ("41", "42", "43"),
+    "41": (),  # Empty tuple indicates final node
+    "42": (),
+    "43": (),
 }
 
-FINAL_NODES = ('41', '42', '43')
-IDEAL = (1/3, 1/3, 1/3)
+FINAL_NODES = ("41", "42", "43")
+IDEAL = (1 / 3, 1 / 3, 1 / 3)
+
 
 def get_random_next_node(current_node: str) -> str:
     """
@@ -31,6 +32,7 @@ def get_random_next_node(current_node: str) -> str:
     if not neighbors:
         return None  # No next node available
     return random.choice(neighbors)
+
 
 def random_walk(probs: dict) -> str:
     """
@@ -56,6 +58,7 @@ def random_walk(probs: dict) -> str:
 
     return current_node
 
+
 def simulate_walks(n: int, probs: dict) -> dict:
     """
     Simulates multiple random walks and counts the occurrences of final nodes.
@@ -77,19 +80,24 @@ def simulate_walks(n: int, probs: dict) -> dict:
             counter[final_node] = 1
     return counter
 
+
 def counter_to_probs(counter: Dict[str, int], n: int) -> Tuple[float, float, float]:
     return tuple(counter.get(node, 0) / n for node in FINAL_NODES)
+
 
 def get_norm(x: Tuple[float, float, float]) -> float:
     return sum(v * v for v in x) ** 0.5
 
+
 def fmt_triplet(x: Tuple[float, float, float], digits: int = 4) -> str:
     return "(" + ", ".join(f"{v:.{digits}f}" for v in x) + ")"
+
 
 def fmt_probs_dict(d: Dict[str, float]) -> str:
     # consistent ordering
     items = [(k, d[k]) for k in sorted(d.keys())]
     return "{" + ", ".join(f"'{k}': {v:g}" for k, v in items) + "}"
+
 
 def print_table(rows):
     headers = ["n", "probs", "empirical pi_4", "||empirical pi_4 - ideal||_2"]
@@ -111,12 +119,13 @@ def print_table(rows):
         line = sep.join(str(r[h]).ljust(widths[i]) for i, h in enumerate(headers))
         print(line)
 
+
 def main():
     n_vals = (10, 100, 1000, 10000, 100000)
     probs_list = [
-        {'11': 0.5, '12': 0.5},
-        {'11': 0.4, '12': 0.6},
-        {'11': 0.1, '12': 0.9},
+        {"11": 0.5, "12": 0.5},
+        {"11": 0.4, "12": 0.6},
+        {"11": 0.1, "12": 0.9},
     ]
 
     rows = []
@@ -126,15 +135,17 @@ def main():
             emp = counter_to_probs(counter, n)
             diff = tuple(emp[i] - IDEAL[i] for i in range(3))
 
-            rows.append({
-                "n": n,
-                "probs": fmt_probs_dict(probs),
-                "empirical pi_4": fmt_triplet(emp, digits=4),
-                "||empirical pi_4 - ideal||_2": f"{get_norm(diff):.6f}",
-            })
+            rows.append(
+                {
+                    "n": n,
+                    "probs": fmt_probs_dict(probs),
+                    "empirical pi_4": fmt_triplet(emp, digits=4),
+                    "||empirical pi_4 - ideal||_2": f"{get_norm(diff):.6f}",
+                }
+            )
 
     print_table(rows)
-        
+
 
 if __name__ == "__main__":
     main()

@@ -5,11 +5,10 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "bandit-sim"
 version = "0.1.0"
-description = "Bandit algorithm simulations and regret experiments for Gaussian bandits."
+description = "Bandit algorithms and environments."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-  "matplotlib>=3.8",
   "numpy>=1.26",
 ]
 authors = [
@@ -20,9 +19,6 @@ authors = [
 dev = [
   "ruff>=0.11",
 ]
-
-[project.scripts]
-bandit-sim = "main:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

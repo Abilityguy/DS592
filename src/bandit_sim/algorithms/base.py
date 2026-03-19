@@ -70,8 +70,8 @@ class BanditAlgorithm(ABC):
         if horizon <= 0:
             raise ValueError("horizon must be positive.")
 
-        self._prepare_run(horizon)
         self.initialize(bandit.n_arms)
+        self._prepare_run(horizon)
 
         rewards = np.empty(horizon, dtype=np.float64)
         actions = np.empty(horizon, dtype=np.int_)
