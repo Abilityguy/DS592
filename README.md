@@ -1,6 +1,6 @@
 # Bandit Sim
 
-This repository provides a reusable `bandit_sim` library for running bandit experiments. It also contains homework-specific experiment scripts and outputs inside the homework directories.
+A library for running bandit experiments.
 
 ## Layout
 
@@ -8,6 +8,7 @@ This repository provides a reusable `bandit_sim` library for running bandit expe
 src/bandit_sim/
 hw1/
 hw3/
+hw4/
 ```
 
 ## Install
