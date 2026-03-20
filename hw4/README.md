@@ -54,7 +54,7 @@ This experiment:
   - arms 3-10 mean `-0.5`
 - sets reward variance to `1`
 - uses horizon `2000`
-- sweeps \(\Delta \in \{0.05, 0.1, \ldots, 1.0\}\)
+- sweeps \(Δ ∈ \{0.05, 0.1, ..., 1.0\}\)
 - runs `10` simulations per delta
 - compares:
   - `UCB`
