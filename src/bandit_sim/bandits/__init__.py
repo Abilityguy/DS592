@@ -1,6 +1,6 @@
 """Bandit environment implementations."""
 
 from bandit_sim.bandits.base import BanditEnvironment
-from bandit_sim.bandits.n_armed_guassian_bandit import NArmedGaussianBandit
+from bandit_sim.bandits.gaussian_bandit import GaussianBandit
 
-__all__ = ["BanditEnvironment", "NArmedGaussianBandit"]
+__all__ = ["BanditEnvironment", "GaussianBandit"]

@@ -15,7 +15,7 @@ from bandit_sim.algorithms import (
     ExploreThenCommit,
     SuccessiveElimination,
 )
-from bandit_sim.bandits import NArmedGaussianBandit
+from bandit_sim.bandits import GaussianBandit
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -71,7 +71,7 @@ def run_delta_sweep(config: DeltaSweepConfig) -> dict[str, dict[str, np.ndarray]
     results: dict[str, dict[str, np.ndarray]] = {}
 
     for delta_index, delta in enumerate(config.deltas):
-        bandit = NArmedGaussianBandit(
+        bandit = GaussianBandit(
             arm_means=(config.optimal_mean, config.optimal_mean - float(delta)),
             arm_stds=(config.optimal_std, config.suboptimal_std),
             seed=config.bandit_seed_base + delta_index,

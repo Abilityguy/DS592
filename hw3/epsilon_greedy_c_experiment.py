@@ -9,7 +9,7 @@ import matplotlib
 import numpy as np
 
 from bandit_sim.algorithms import EpsilonGreedy
-from bandit_sim.bandits import NArmedGaussianBandit
+from bandit_sim.bandits import GaussianBandit
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -63,7 +63,7 @@ def run_c_sweep(config: EpsilonGreedyCSweepConfig) -> dict[str, dict[str, np.nda
         }
 
     for delta_index, delta in enumerate(config.deltas):
-        bandit = NArmedGaussianBandit(
+        bandit = GaussianBandit(
             arm_means=(config.optimal_mean, config.optimal_mean - float(delta)),
             arm_stds=(config.optimal_std, config.suboptimal_std),
             seed=config.bandit_seed_base + delta_index,

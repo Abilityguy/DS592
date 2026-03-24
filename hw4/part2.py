@@ -8,7 +8,7 @@ import matplotlib
 import numpy as np
 
 from bandit_sim.algorithms import BanditAlgorithm, ThompsonSampling, UpperConfidenceBound
-from bandit_sim.bandits import NArmedGaussianBandit
+from bandit_sim.bandits import GaussianBandit
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -51,7 +51,7 @@ def empirical_regret_statistics(
     return average_regret, standard_error
 
 
-def build_bandit(delta: float, seed: int, config: Part2Config) -> NArmedGaussianBandit:
+def build_bandit(delta: float, seed: int, config: Part2Config) -> GaussianBandit:
     """Create the fixed 10-armed Gaussian bandit for one delta value."""
     arm_means = (
         config.optimal_mean,  # optimal arm
@@ -59,7 +59,7 @@ def build_bandit(delta: float, seed: int, config: Part2Config) -> NArmedGaussian
         *([config.suboptimal_tail_mean] * 8),  # suboptimal tail arms
     )
     arm_stds = tuple(float(config.reward_std) for _ in range(10))
-    return NArmedGaussianBandit(arm_means=arm_means, arm_stds=arm_stds, seed=seed)
+    return GaussianBandit(arm_means=arm_means, arm_stds=arm_stds, seed=seed)
 
 
 def build_algorithms() -> dict[str, BanditAlgorithm]:

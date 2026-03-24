@@ -9,7 +9,7 @@ import numpy as np
 import numpy.typing as npt
 
 from bandit_sim.algorithms import ThompsonSampling
-from bandit_sim.bandits import NArmedGaussianBandit
+from bandit_sim.bandits import GaussianBandit
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -76,7 +76,7 @@ def run_single_simulation(
     bandit_seed: int,
 ) -> float:
     """Run one simulation and return its Bayesian regret."""
-    bandit = NArmedGaussianBandit(
+    bandit = GaussianBandit(
         arm_means=tuple(float(x) for x in arm_means),
         arm_stds=tuple(float(reward_std) for _ in range(arm_means.shape[0])),
         seed=bandit_seed,

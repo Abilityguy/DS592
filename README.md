@@ -37,9 +37,9 @@ pip install -r requirements.txt
 
 ```python
 from bandit_sim.algorithms import EpsilonGreedy
-from bandit_sim.bandits import NArmedGaussianBandit
+from bandit_sim.bandits import GaussianBandit
 
-bandit = NArmedGaussianBandit(
+bandit = GaussianBandit(
     arm_means=(0.3, 0.7, 0.5),
     arm_stds=(1.0, 1.0, 1.0),
     seed=7,

@@ -1,4 +1,4 @@
-"""Concrete n-armed Gaussian bandit."""
+"""Concrete Gaussian bandit."""
 
 from __future__ import annotations
 
@@ -11,8 +11,8 @@ from bandit_sim.bandits.base import BanditEnvironment
 
 
 @dataclass
-class NArmedGaussianBandit(BanditEnvironment):
-    """An N-armed Gaussian Bandit problem."""
+class GaussianBandit(BanditEnvironment):
+    """A Gaussian Bandit problem."""
 
     arm_means: tuple[float, ...]
     arm_stds: tuple[float, ...]
@@ -22,7 +22,7 @@ class NArmedGaussianBandit(BanditEnvironment):
 
     def __post_init__(self) -> None:
         if not self.arm_means:
-            raise ValueError("NArmedGaussianBandit requires at least one arm.")
+            raise ValueError("GaussianBandit requires at least one arm.")
         if len(self.arm_means) != len(self.arm_stds):
             raise ValueError("Arm means and standard deviations must have the same length.")
 
