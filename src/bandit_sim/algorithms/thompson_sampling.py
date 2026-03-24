@@ -25,6 +25,7 @@ class ThompsonSampling(BanditAlgorithm):
     # Uniform Prior variables
     _mins: npt.NDArray[np.float64] = field(init=False)
     _maxs: npt.NDArray[np.float64] = field(init=False)
+    _posterior_args: list[Any] = field(init=False)
 
     def __post_init__(self) -> None:
         self._rng = np.random.default_rng(self.seed)
@@ -39,7 +40,7 @@ class ThompsonSampling(BanditAlgorithm):
         elif self.prior_type == "uniform":
             self._mins = np.array([x["min"] for x in self.prior_args], dtype=np.float64)
             self._maxs = np.array([x["max"] for x in self.prior_args], dtype=np.float64)
-            self._posterior_args: list[Any] = [None for _ in range(self.n_arms)]
+            self._posterior_args = [None for _ in range(self.n_arms)]
         else:
             raise ValueError("Invalid prior_type. Must be 'gaussian' or 'uniform'.")
 

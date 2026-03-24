@@ -1,4 +1,4 @@
-"""Concrete Gaussian bandit."""
+"""Gaussian bandit."""
 
 from __future__ import annotations
 
