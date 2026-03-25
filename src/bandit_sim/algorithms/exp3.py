@@ -46,10 +46,10 @@ class EXP3(BanditAlgorithm):
 
         if arm_index < 0 or self.n_arms is None or arm_index >= self.n_arms:
             raise IndexError("arm_index is out of range.")
-        
+
         # Compute an unbiased estimate of the reward
         # r~_t(i) = (1 - 1/P_t(i)) * (1 - r_t(i)) for the pulled arm
         unbiased_reward_estimate = (1 - 1 / self.probabilities[arm_index]) * (1 - reward)
-        
+
         # Update weights
         self.weights[arm_index] *= np.exp(self.learning_rate * unbiased_reward_estimate)

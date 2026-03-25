@@ -38,4 +38,12 @@ class BernoulliBandit(BanditEnvironment):
             raise IndexError("arm_index is out of range.")
 
         prob = self._arm_probs[arm_index]
-        return float(self._rng.binomial(n=1, p=prob))
+        return float(self._bernoulli_sample(p=prob))
+
+    def _bernoulli_sample(self, p: float) -> int:
+        """Return 1 with probability p and 0 otherwise.
+
+        Samples a uniform random variable and compares it against p,
+        which is equivalent to drawing from Bernoulli(p).
+        """
+        return int(self._rng.uniform() < p)

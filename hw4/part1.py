@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 import json
+from dataclasses import dataclass
 from pathlib import Path
 
 import matplotlib
@@ -13,7 +13,6 @@ from bandit_sim.bandits import GaussianBandit
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-
 
 GLOBAL_SEED = 42
 

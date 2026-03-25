@@ -9,6 +9,7 @@ src/bandit_sim/
 hw1/
 hw3/
 hw4/
+hw5/
 ```
 
 ## Install
