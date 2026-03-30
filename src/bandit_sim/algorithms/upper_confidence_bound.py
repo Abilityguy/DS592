@@ -15,10 +15,10 @@ class UpperConfidenceBound(BanditAlgorithm):
     """An implementation of the Upper Confidence Bound algorithm."""
 
     seed: int | None = None
+    delta: float = 0.01  # The confidence level for confidence intervals
+    beta: float = 1.0  # The subgaussian parameter of the reward distributions
     counts: npt.NDArray[np.int_] = field(init=False)
     value_estimates: npt.NDArray[np.float64] = field(init=False)
-    delta: float = field(default=0.01, init=False)  # The confidence level for confidence intervals
-    beta: float = field(default=1.0, init=False)  # The subgaussian parameter of the reward distributions
     _run_horizon: int = field(default=0, init=False)
 
     def __post_init__(self) -> None:
