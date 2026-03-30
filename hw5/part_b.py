@@ -29,9 +29,14 @@ class LearningRateSweepConfig:
     horizon: int = 100000
     learning_rates: tuple[float, ...] = (0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1)
     n_simulations: int = 100
-    bandit_seed: int = GLOBAL_SEED
+    master_seed: int = GLOBAL_SEED
     json_output_path: Path = Path("results/exp3_lr_sweep.json")
     output_path: Path = Path("results/exp3_lr_sweep.png")
+
+
+def draw_seed(rng: np.random.Generator) -> int:
+    """Draw an independent integer seed from a master RNG."""
+    return int(rng.integers(0, 2**32 - 1))
 
 
 def theoretical_learning_rate(horizon: int, n_arms: int) -> float:
@@ -55,20 +60,21 @@ def empirical_regret_statistics(
 
 def run_lr_sweep(config: LearningRateSweepConfig) -> dict[str, dict[str, float]]:
     """Run EXP3 simulations across learning rate values."""
+    master_rng = np.random.default_rng(config.master_seed)
     theoretical_lr = theoretical_learning_rate(config.horizon, N_ARMS)
     all_lrs = list(config.learning_rates) + [theoretical_lr]
-
-    bandit = BernoulliBandit(
-        arm_probs=(config.mean_1, config.mean_2),
-        seed=config.bandit_seed,
-    )
-    optimal_expected_reward = float(np.max(bandit.expected_rewards))
+    bandit_seed = draw_seed(master_rng)
+    optimal_expected_reward = float(max(config.mean_1, config.mean_2))
 
     results: dict[str, dict[str, float]] = {}
 
     for lr_index, lr in enumerate(all_lrs):
         key = f"theoretical ({lr:.5f})" if lr == theoretical_lr else f"{lr:g}"
-        algorithm = EXP3(seed=GLOBAL_SEED + lr_index, learning_rate=lr)
+        bandit = BernoulliBandit(
+            arm_probs=(config.mean_1, config.mean_2),
+            seed=bandit_seed,
+        )
+        algorithm = EXP3(seed=draw_seed(master_rng), learning_rate=lr)
         batch_result = algorithm.run_n_simulations(
             bandit=bandit,
             horizon=config.horizon,
@@ -99,7 +105,7 @@ def build_json_summary(
         "mean_2": config.mean_2,
         "horizon": config.horizon,
         "n_simulations": config.n_simulations,
-        "global_seed": GLOBAL_SEED,
+        "global_seed": config.master_seed,
         "results": [
             {
                 "label": key,

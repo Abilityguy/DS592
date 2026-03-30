@@ -1,4 +1,4 @@
-"""EXP3 learning rate sweep across delta values on a 2-armed Bernoulli bandit."""
+"""EXP3 learning rate sweep for large delta values on a 2-armed Bernoulli bandit."""
 
 from __future__ import annotations
 
@@ -16,22 +16,22 @@ from bandit_sim.bandits import BernoulliBandit
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-GLOBAL_SEED = 42
+GLOBAL_SEED = 44
 N_ARMS = 2
 
 
 @dataclass
 class DeltaLRSweepConfig:
-    """Configuration for the EXP3 learning-rate sweep across delta values."""
+    """Configuration for the EXP3 learning-rate sweep across large delta values."""
 
     mean_1: float = 0.5
     horizon: int = 100000
-    deltas: tuple[float, ...] = (0.01, 0.05, 0.1, 0.15, 0.2, 0.25)
+    deltas: tuple[float, ...] = (0.35, 0.4, 0.45, 0.5)
     learning_rates: tuple[float, ...] = (0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1)
     n_simulations: int = 100
     master_seed: int = GLOBAL_SEED
-    json_output_path: Path = Path("results/exp3_delta_lr_sweep.json")
-    output_path: Path = Path("results/exp3_delta_lr_sweep.png")
+    json_output_path: Path = Path("results/exp3_large_delta_lr_sweep.json")
+    output_path: Path = Path("results/exp3_large_delta_lr_sweep.png")
 
 
 def draw_seed(rng: np.random.Generator) -> int:
@@ -144,11 +144,10 @@ def plot_delta_lr_sweep(
     """Plot a grid of subplots, one per delta, showing regret vs learning rate."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    n_deltas = len(config.deltas)
-    n_cols = 3
-    n_rows = (n_deltas + n_cols - 1) // n_cols
+    n_cols = 2
+    n_rows = 2
     figure, axes = plt.subplots(n_rows, n_cols, figsize=(5 * n_cols, 4 * n_rows))
-    axes_flat = axes.flat
+    axes_flat = np.array(axes).flat
 
     theoretical_lr = theoretical_learning_rate(config.horizon, N_ARMS)
 
@@ -212,7 +211,7 @@ def main() -> None:
     config = DeltaLRSweepConfig(n_simulations=args.n_simulations)
     theoretical_lr = theoretical_learning_rate(config.horizon, N_ARMS)
 
-    print("EXP3 Delta/Learning Rate Sweep")
+    print("EXP3 Large Delta/Learning Rate Sweep")
     print(f"mean_1={config.mean_1}, horizon={config.horizon}")
     print(f"deltas={list(config.deltas)}")
     print(f"learning_rates={list(config.learning_rates)}")

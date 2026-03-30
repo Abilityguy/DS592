@@ -37,9 +37,14 @@ class HorizonSweepConfig:
         )
     )
     n_simulations: int = 100
-    bandit_seed_base: int = GLOBAL_SEED
+    master_seed: int = GLOBAL_SEED
     json_output_path: Path = Path("results/regret_vs_horizon.json")
     output_path: Path = Path("results/regret_vs_horizon.png")
+
+
+def draw_seed(rng: np.random.Generator) -> int:
+    """Draw an independent integer seed from a master RNG."""
+    return int(rng.integers(0, 2**32 - 1))
 
 
 def empirical_regret_statistics(
@@ -56,36 +61,46 @@ def empirical_regret_statistics(
     return average_regret, standard_error
 
 
-def build_algorithms(horizon: int, n_arms: int) -> dict[str, BanditAlgorithm]:
+def build_algorithms(
+    horizon: int,
+    n_arms: int,
+    rng: np.random.Generator,
+) -> dict[str, BanditAlgorithm]:
     """Create fresh algorithm instances."""
     # We set the learning rate for EXP3 according to a common theoretical choice
     exp3_lr = np.sqrt(2 * np.log(n_arms) / (horizon * n_arms))
+
+    # Since we are using Bernoulli bandits, and the Bernoulli distribution is sub-gaussian with factor 1/4
+    ucb_beta = 0.25
     return {
-        "ucb": UpperConfidenceBound(seed=GLOBAL_SEED),
-        "exp3": EXP3(seed=GLOBAL_SEED, learning_rate=exp3_lr),
+        "ucb": UpperConfidenceBound(seed=draw_seed(rng), beta=ucb_beta),
+        "ucb_beta_1.0": UpperConfidenceBound(seed=draw_seed(rng), beta=1.0),
+        "exp3": EXP3(seed=draw_seed(rng), learning_rate=exp3_lr),
     }
 
 
 def run_horizon_sweep(config: HorizonSweepConfig) -> dict[str, dict[str, np.ndarray]]:
     """Run simulations across a range of horizon values."""
     results: dict[str, dict[str, np.ndarray]] = {}
+    master_rng = np.random.default_rng(config.master_seed)
 
     for horizon_index, horizon in enumerate(config.horizons):
-        bandit = BernoulliBandit(
-            arm_probs=(config.mean_1, config.mean_2),
-            seed=config.bandit_seed_base + horizon_index,
-        )
-        optimal_expected_reward = float(np.max(bandit.expected_rewards))
+        bandit_seed = draw_seed(master_rng)
+        optimal_expected_reward = float(max(config.mean_1, config.mean_2))
 
         print(f"horizon={horizon}")
 
-        for name, algorithm in build_algorithms(horizon, 2).items():
+        for name, algorithm in build_algorithms(horizon, 2, master_rng).items():
             if name not in results:
                 results[name] = {
                     "average_regret": np.empty(config.horizons.shape[0], dtype=np.float64),
                     "standard_error": np.empty(config.horizons.shape[0], dtype=np.float64),
                 }
 
+            bandit = BernoulliBandit(
+                arm_probs=(config.mean_1, config.mean_2),
+                seed=bandit_seed,
+            )
             batch_result = algorithm.run_n_simulations(
                 bandit=bandit,
                 horizon=int(horizon),
@@ -128,7 +143,7 @@ def build_json_summary(
         "mean_1": config.mean_1,
         "mean_2": config.mean_2,
         "n_simulations": config.n_simulations,
-        "global_seed": GLOBAL_SEED,
+        "global_seed": config.master_seed,
         "horizons": horizons_summary,
     }
 
@@ -149,10 +164,12 @@ def plot_regret_vs_horizon(
     figure, axis = plt.subplots(figsize=(8, 5))
     colors = {
         "ucb": "tab:blue",
+        "ucb_beta_1.0": "tab:green",
         "exp3": "tab:orange",
     }
     label_map = {
-        "ucb": "UCB",
+        "ucb": r"UCB ($\beta=0.25$)",
+        "ucb_beta_1.0": r"UCB ($\beta=1.0$)",
         "exp3": "EXP3",
     }
 
