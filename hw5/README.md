@@ -5,6 +5,7 @@ This directory contains the Homework 5 experiment scripts, plots, and results. I
 ## Structure
 
 ```text
+part_2f.py
 part_a.py
 part_b.py
 part_c.py
@@ -14,13 +15,38 @@ part_e.py
 ## Design
 
 - The shared library code is maintained outside `hw5` in `../src/bandit_sim`.
-- All experiments use a 2-armed Bernoulli bandit with arm means μ₁ = 0.5 and μ₂ = μ₁ + Δ.
-- `part_a.py` compares UCB (β = 0.25 and β = 1.0) and EXP3 across a range of horizon values.
+- `part_2f.py` implements the adversarial loss-sequence experiment for studying the variance of loss-based EXP3.
+- Parts A, B, C, and E use a 2-armed Bernoulli bandit with arm means μ₁ = 0.5 and μ₂ = μ₁ + Δ.
+- `part_a.py` compares UCB (β = 0.5 and β = 1.0) and EXP3 across a range of horizon values.
 - `part_b.py` sweeps EXP3 learning rates at a fixed horizon for a fixed Δ.
 - `part_c.py` repeats the learning rate sweep of Part B across several Δ values.
-- `part_e.py` repeats the learning rate sweep of Part C for a large gap value Δ = 0.5.
+- `part_e.py` repeats the learning rate sweep of Part C for several large gap values.
 - Each script uses a single `master_rng` seeded from `master_seed`. Independent integer seeds for bandits and algorithms are drawn from it via `draw_seed(rng)`, ensuring reproducibility and avoiding seed collisions.
 - Environment setup is documented in the repository root `README.md`.
+
+## Part 2F: Variance of EXP3
+
+Run Part 2F with:
+
+```bash
+python part_2f.py [--n-simulations N] [--horizon T]
+```
+
+This experiment:
+
+- implements the two-armed adversarial loss sequence from Problem 2
+- uses losses
+  - arm 1: `0` for the first half of the horizon, then `1`
+  - arm 2: `alpha` for the first half of the horizon, then `0`
+- sweeps `alpha ∈ {0.28, 0.285, 0.29, 0.295, 0.3}`
+- uses the theoretical learning rate `η = sqrt(2 ln K / (n K))`
+- runs loss-based EXP3 directly in the script to match the theoretical setup
+- plots the regret distribution across simulations as a boxplot for each `alpha`
+
+It generates:
+
+- `results/exp3_variance_boxplot.png`: regret boxplots across the alpha values
+- `results/exp3_variance_boxplot.json`: raw regret samples and summary statistics for each alpha
 
 ## Part A: Horizon Sweep
 
@@ -35,7 +61,7 @@ This experiment:
 - uses a 2-armed Bernoulli bandit with μ₁ = 0.5, μ₂ = 0.55
 - sweeps horizons `10`, `100`, `1000`, `10000`, `100000`
 - runs `100` simulations per horizon
-- compares UCB (β = 0.25), UCB (β = 1.0), and EXP3, where EXP3 uses the theoretical learning rate η = √(2 ln K / (T K)) for each horizon
+- compares UCB (β = 0.5), UCB (β = 1.0), and EXP3, where EXP3 uses the theoretical learning rate η = √(2 ln K / (T K)) for each horizon
 
 It generates:
 
@@ -100,11 +126,12 @@ python part_e.py [--n-simulations N]
 This experiment:
 
 - uses a 2-armed Bernoulli bandit with μ₁ = 0.5
-- uses Δ = 0.5, so μ₂ = 1.0
+- sweeps Δ ∈ {0.35, 0.4, 0.45, 0.5}, so μ₂ = μ₁ + Δ
 - sweeps the same learning rates as Part B
-- runs `100` simulations per learning rate (overridable via `--n-simulations`)
+- runs `100` simulations per (Δ, η) combination (overridable via `--n-simulations`)
+- produces a 2×2 grid of subplots, one per Δ value
 
 It generates:
 
-- `results/exp3_large_delta_lr_sweep.png`: regret-vs-learning-rate plot for Δ = 0.5
-- `results/exp3_large_delta_lr_sweep.json`: empirical average regret and standard error for each learning rate
+- `results/exp3_large_delta_lr_sweep.png`: 2×2 grid of regret-vs-learning-rate plots across large Δ values
+- `results/exp3_large_delta_lr_sweep.json`: empirical average regret and standard error for each (Δ, η) combination

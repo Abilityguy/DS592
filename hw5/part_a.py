@@ -70,8 +70,9 @@ def build_algorithms(
     # We set the learning rate for EXP3 according to a common theoretical choice
     exp3_lr = np.sqrt(2 * np.log(n_arms) / (horizon * n_arms))
 
-    # Since we are using Bernoulli bandits, and the Bernoulli distribution is sub-gaussian with factor 1/4
-    ucb_beta = 0.25
+    # Bernoulli rewards have variance proxy 1/4, so the outside-the-square-root
+    # multiplier in this UCB parameterization is sqrt(1/4) = 1/2.
+    ucb_beta = 0.5
     return {
         "ucb": UpperConfidenceBound(seed=draw_seed(rng), beta=ucb_beta),
         "ucb_beta_1.0": UpperConfidenceBound(seed=draw_seed(rng), beta=1.0),
@@ -168,7 +169,7 @@ def plot_regret_vs_horizon(
         "exp3": "tab:orange",
     }
     label_map = {
-        "ucb": r"UCB ($\beta=0.25$)",
+        "ucb": r"UCB ($\beta=0.5$)",
         "ucb_beta_1.0": r"UCB ($\beta=1.0$)",
         "exp3": "EXP3",
     }
