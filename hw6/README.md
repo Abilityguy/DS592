@@ -16,19 +16,6 @@ part2.py
 - `part2.py` compares OFUL and multi-armed-bandit UCB on the finite action set `{-1, 1}^5`.
 - In each script, `theta_star` is sampled randomly from a standard Gaussian direction and normalized to have Euclidean norm `1`.
 - Both scripts set the OFUL confidence level to $\delta = 1/n$, where $n$ is the experiment horizon.
-- The current OFUL implementation uses the following confidence radius:
-
-$$
-\beta_t
-=
-\left(
-  \sqrt{\lambda}\,S
-  +
-  \sqrt{2 \log(1/\delta) + d \log\!\left(\frac{d\lambda + tL^2}{d\lambda}\right)}
-\right)^2.
-$$
-
-Here, $S$ is the upper bound on $\|\theta_\star\|_2$, and $L$ is the action norm bound.
 
 - Environment setup is documented in the repository root `README.md`.
 
