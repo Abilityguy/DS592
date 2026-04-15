@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 import numpy as np
 import numpy.typing as npt
 
-from bandit_sim.bandits.base import BanditEnvironment
+from bandit_sim.bandits.base import BanditEnvironment, ContextualActionSet, ContextualBanditEnvironment
 
 
 @dataclass
@@ -33,6 +33,44 @@ class SimulationBatchResult:
 
     rewards: npt.NDArray[np.float64]
     actions: npt.NDArray[np.int_]
+
+    @property
+    def total_rewards(self) -> npt.NDArray[np.float64]:
+        return self.rewards.sum(axis=1)
+
+    @property
+    def average_total_reward(self) -> float:
+        if self.rewards.size == 0:
+            return 0.0
+        return float(self.total_rewards.mean())
+
+    @property
+    def n_simulations(self) -> int:
+        return int(self.rewards.shape[0])
+
+
+@dataclass
+class ContextualSimulationResult:
+    """Stores the outputs of a contextual bandit simulation run."""
+
+    rewards: npt.NDArray[np.float64]
+    chosen_actions: npt.NDArray[np.float64]
+
+    @property
+    def total_reward(self) -> float:
+        return float(self.rewards.sum())
+
+    @property
+    def steps(self) -> int:
+        return int(self.rewards.shape[0])
+
+
+@dataclass
+class ContextualSimulationBatchResult:
+    """Stores the outputs of multiple contextual bandit simulation runs."""
+
+    rewards: npt.NDArray[np.float64]
+    chosen_actions: npt.NDArray[np.float64]
 
     @property
     def total_rewards(self) -> npt.NDArray[np.float64]:
@@ -124,3 +162,105 @@ class BanditAlgorithm(ABC):
     def _check_initialized(self) -> None:
         if self.n_arms is None:
             raise RuntimeError("Algorithm has not been initialized with a bandit.")
+
+
+@dataclass
+class ContextualBanditAlgorithm(ABC):
+    """Base class for algorithms that act on contextual bandit environments."""
+
+    context_dimension: int | None = field(default=None, init=False)
+    total_steps: int = field(default=0, init=False)
+
+    def initialize(self, context_dimension: int) -> None:
+        """Prepare the algorithm for a contextual bandit with the given shape."""
+        if context_dimension <= 0:
+            raise ValueError("context_dimension must be positive.")
+
+        self.context_dimension = context_dimension
+        self.total_steps = 0
+        self._initialize_state()
+
+    def run(self, bandit: ContextualBanditEnvironment, horizon: int) -> ContextualSimulationResult:
+        """Run this algorithm against a contextual bandit for a fixed number of steps."""
+        if horizon <= 0:
+            raise ValueError("horizon must be positive.")
+
+        self.initialize(bandit.context_dimension)
+        self._prepare_run(horizon)
+
+        rewards = np.empty(horizon, dtype=np.float64)
+        chosen_actions = np.empty((horizon, bandit.context_dimension), dtype=np.float64)
+
+        for step in range(horizon):
+            action_set = bandit.sample_context()
+            self._validate_action_set(action_set)
+
+            chosen_action = np.asarray(self.select_action(action_set), dtype=np.float64)
+            self._validate_action(action_set, chosen_action)
+            reward = bandit.pull(chosen_action)
+            self.update(chosen_action.copy(), reward)
+            self.total_steps += 1
+
+            rewards[step] = reward
+            chosen_actions[step] = chosen_action
+
+        return ContextualSimulationResult(rewards=rewards, chosen_actions=chosen_actions)
+
+    def run_n_simulations(
+        self,
+        bandit: ContextualBanditEnvironment,
+        horizon: int,
+        n_simulations: int,
+    ) -> ContextualSimulationBatchResult:
+        """Run this algorithm against the same contextual bandit multiple times."""
+        if n_simulations <= 0:
+            raise ValueError("n_simulations must be positive.")
+
+        rewards = np.empty((n_simulations, horizon), dtype=np.float64)
+        chosen_actions = np.empty((n_simulations, horizon, bandit.context_dimension), dtype=np.float64)
+
+        for simulation_index in range(n_simulations):
+            result = self.run(bandit=bandit, horizon=horizon)
+            rewards[simulation_index] = result.rewards
+            chosen_actions[simulation_index] = result.chosen_actions
+
+        return ContextualSimulationBatchResult(rewards=rewards, chosen_actions=chosen_actions)
+
+    def _prepare_run(self, horizon: int) -> None:
+        """Allow subclasses to derive per-run state from the simulation horizon."""
+
+    @abstractmethod
+    def _initialize_state(self) -> None:
+        """Reset any algorithm-specific state."""
+
+    @abstractmethod
+    def select_action(self, action_set: ContextualActionSet) -> npt.NDArray[np.float64]:
+        """Choose an action from the current contextual action set."""
+
+    @abstractmethod
+    def update(self, chosen_action: npt.NDArray[np.float64], reward: float) -> None:
+        """Update internal state after observing a reward for the chosen action."""
+
+    def _check_initialized(self) -> None:
+        if self.context_dimension is None:
+            raise RuntimeError("Algorithm has not been initialized with a contextual bandit.")
+
+    def _validate_action_set(self, action_set: ContextualActionSet) -> None:
+        self._check_initialized()
+        assert self.context_dimension is not None
+
+        if action_set.dimension != self.context_dimension:
+            raise ValueError(
+                f"Expected action_set with dimension {self.context_dimension}, got {action_set.dimension}."
+            )
+
+    def _validate_action(self, action_set: ContextualActionSet, action: npt.NDArray[np.float64]) -> None:
+        self._validate_action_set(action_set)
+        assert self.context_dimension is not None
+
+        if action.shape != (self.context_dimension,):
+            raise ValueError(
+                f"Expected action with shape ({self.context_dimension},), got {action.shape}."
+            )
+        if not action_set.contains(action):
+            raise ValueError("Chosen action is not contained in the current action set.")
